@@ -1,3 +1,5 @@
+import time
+
 from django.shortcuts import render
 from .forms import RegForm, ExtraRegForm
 
@@ -10,20 +12,14 @@ from django.contrib.auth.decorators import login_required
 def index(request):
     return render(request,'user_login/index.html')
 
-@login_required
-def special(request):
-
-    # Remember to also set login url in settings.py!
-    return HttpResponse('You are logged in. Nice!')
 
 @login_required
 def user_logout(request):
 
-    # Log out the user.
     logout(request)
-    # Return to homepage.
 
     return HttpResponseRedirect(reverse('user_login:login_user'))
+
 
 def register(request):
 
@@ -59,9 +55,16 @@ def register(request):
             # Check if they provided a profile picture
             if 'user_picture' in request.FILES:
 
-                print('e poza')
+                photo = request.FILES['user_picture']
 
-                profile.user_picture = request.FILES['user_picture']
+                photo._name = ''.join([
+                    user.username,
+                    '_',
+                    str(int(time.time())),
+                    '.jpg',
+                ])
+
+                profile.user_picture = photo
 
             profile.save()
             registered = True
@@ -84,6 +87,7 @@ def register(request):
             'registered':registered
         }
     )
+
 
 def login_user(request):
 

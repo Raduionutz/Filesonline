@@ -1,0 +1,12 @@
+{% extends 'user_login/base.html' %}
+{% block body_block %}
+  <div class="container">
+    <div class="jumbotron">
+      <p>Buna ziua, Domnule</p>
+      {{ user.pk }}
+      {{ user.username }}
+      <!--<img src="{{ user.user_profile.user_picture }}" alt="">-->
+      {{ user.user_profile.user_picture }}
+    </div>
+  </div>
+{% endblock %}

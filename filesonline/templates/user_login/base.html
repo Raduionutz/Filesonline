@@ -15,14 +15,13 @@
                   <li class="nav-item"><a class="nav-link" href="{% url 'user_login:register' %}">Register</a></li>
 
                   {% if user.is_authenticated %}
-                        <li class="nav-item"><a href="{% url 'user_login:logout' %}">Logout</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'user_login:logout' %}">Logout</a></li>
                   {% else %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'user_login:login_user' %}">Login</a></li>
                   {% endif %}
             </ul>
         </div>
     </nav>
-
 
     <div class="container">
     {% block body_block %}

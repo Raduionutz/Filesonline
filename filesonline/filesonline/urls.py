@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include(('user_login.urls', 'user_login'), namespace='user_login')),
     path('upload/', include(('file_upload.urls', 'file_upload'), namespace='file_upload')),
+    path('me/', include(('mypage.urls', 'mypage'), namespace='mypage')),
 ]
