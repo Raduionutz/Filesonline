@@ -9,6 +9,20 @@
       {{ user.user_profile.user_picture }}
 
       <hr>
+      {% for file in files %}
+        <p>
+          {{ file }}
+          <form id="delete-{{ file }}"
+                action="{% url 'mypage:delete_file' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="file" value="{{file}}">
+            <button type="submit" form="delete-{{ file }}">
+              X
+            </button>
+          </form>
+        </p>
+      {% endfor %}
+      <hr>
       <p>Incarcare fisier nou:</p>
 
         <form method="POST" enctype="multipart/form-data">

@@ -66,9 +66,11 @@ def register(request):
 
                 profile.user_picture = photo
 
-            profile.save()
 
-            os.mkdir(os.path.join(os.path.join('media', 'user_files'), str(user.pk)))
+            profile.folder = os.path.join(os.path.join('media', 'user_files'), str(user.pk))
+            os.mkdir(profile.folder)
+
+            profile.save()
 
             registered = True
 

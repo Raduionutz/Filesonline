@@ -16,7 +16,10 @@ class MainPageView(LoginRequiredMixin, View):
 
         upload_form = UploadFileForm()
 
+        files = os.listdir(request.user.user_profile.folder)
+
         context = {
+            'files': files,
             'upload_form': upload_form,
         }
 
@@ -24,17 +27,11 @@ class MainPageView(LoginRequiredMixin, View):
 
     def post(self, request):
 
-        print(request.__dict__.keys())
-
-        print(request.user)
-        print(request.FILES)
         form = UploadFileForm(request.POST, request.FILES)
 
         if form.is_valid():
 
             files = request.FILES.getlist('file')
-
-            user_folder = os.path.join(os.path.join('media', 'user_files'), str(request.user.pk))
 
             def handle_uploaded_file(f, filename):
                 with open(filename, 'ab+') as destination:
@@ -44,7 +41,21 @@ class MainPageView(LoginRequiredMixin, View):
             for f in files:
                 handle_uploaded_file(
                     request.FILES['file'],
-                    os.path.join(user_folder, f.name)
+                    os.path.join(request.user.user_profile.folder, f.name)
                 )
+
+        return HttpResponseRedirect(reverse('mypage:main_page'))
+
+class DeleteFileView(LoginRequiredMixin, View):
+
+    login_url = 'user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        file = request.POST.get('file')
+
+        if file:
+            os.remove(os.path.join(request.user.user_profile.folder, file))
 
         return HttpResponseRedirect(reverse('mypage:main_page'))
