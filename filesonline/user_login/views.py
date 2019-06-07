@@ -1,4 +1,4 @@
-import time
+import os, time
 
 from django.shortcuts import render
 from .forms import RegForm, ExtraRegForm
@@ -67,6 +67,9 @@ def register(request):
                 profile.user_picture = photo
 
             profile.save()
+
+            os.mkdir(os.path.join(os.path.join('media', 'user_files'), str(user.pk)))
+
             registered = True
 
         else:

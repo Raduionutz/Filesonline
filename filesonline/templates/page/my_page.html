@@ -7,6 +7,17 @@
       {{ user.username }}
       <!--<img src="{{ user.user_profile.user_picture }}" alt="">-->
       {{ user.user_profile.user_picture }}
+
+      <hr>
+      <p>Incarcare fisier nou:</p>
+
+        <form method="POST" enctype="multipart/form-data">
+            {{ upload_form.as_p }}
+            {% csrf_token %}
+            <input type = "submit" name="clic" value="here">
+        </form>
+
+      <a href="upload file"></a>
     </div>
   </div>
 {% endblock %}

@@ -10,4 +10,4 @@ class UserExtraInfo(models.Model):
     user_picture = models.ImageField(upload_to='profile_pics', blank=True)
 
     def __str__(self):
-        return self.user.name
+        return self.user.username
