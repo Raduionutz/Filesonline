@@ -12,5 +12,4 @@ urlpatterns = [
     path('encrypt_file', views.EncryptFile.as_view(), name='encrypt_file'),
     path('decrypt_file', views.DecryptFile.as_view(), name='decrypt_file'),
     path('dec-download_file', views.DecryptDownloadFile.as_view(), name='dec-download_file'),
-    # path('/folder/<string:path>', views.MainPage.as_view(), name='main_page'),
 ]
