@@ -9,6 +9,8 @@ class File(models.Model):
     upload_time = models.DateTimeField(default=timezone.now)
     shared = models.BooleanField(default=False)
     encrypted = models.BooleanField(default=False)
+    is_directory = models.BooleanField(default=False)
+    path = models.CharField(max_length=265, default='/')
 
     def __str__(self):
         return self.filename
