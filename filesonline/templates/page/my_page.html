@@ -12,6 +12,7 @@
       {% for file in files %}
         <p>
           {{ file }}
+        </p>
           <form id="delete-{{ file }}"
                 action="{% url 'mypage:delete_file' %}" method="post">
             {% csrf_token %}
@@ -20,6 +21,39 @@
               X
             </button>
           </form>
+
+          <form id="download-{{ file }}"
+                action="{% url 'mypage:download_file' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="file" value="{{file}}">
+            <button type="submit" form="download-{{ file }}">
+              O
+            </button>
+          </form>
+
+          <form id="share-{{ file }}"
+                action="{% url 'mypage:share_file' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="file" value="{{file}}">
+            <input type="text" name="share_with" placeholder="user to share with">
+            <button type="submit" form="share-{{ file }}">
+              S
+            </button>
+          </form>
+      {% endfor %}
+
+      <hr>
+        Files shared with me
+      {% for file in shared_with_me %}
+        <p>
+          {{ file }}
+        </p>
+      {% endfor %}
+      <hr>
+        Shared Files
+      {% for file in shared_by_me %}
+        <p>
+          {{ file }}
         </p>
       {% endfor %}
       <hr>
@@ -30,8 +64,6 @@
             {% csrf_token %}
             <input type = "submit" name="clic" value="here">
         </form>
-
-      <a href="upload file"></a>
     </div>
   </div>
 {% endblock %}
