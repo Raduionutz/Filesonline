@@ -180,10 +180,12 @@ class MoveSharedFile(LoginRequiredMixin, View):
 
         file = request.POST.get('file')
 
-        file_owner = SharedFileWith.objects.get(
+        shared_file_obj = SharedFileWith.objects.get(
                 shared_with=request.user,
                 file__filename=file
-        ).file.owner
+        )
+
+        file_owner = shared_file_obj.file.owner
 
         file_path = os.path.join(file_owner.user_profile.folder, file)
         dest_path = os.path.join(request.user.user_profile.folder, file)
@@ -194,6 +196,9 @@ class MoveSharedFile(LoginRequiredMixin, View):
 
             db_file.owner = request.user
             db_file.filename = file
+
+            if shared_file_obj.file.encrypted:
+                db_file.encrypted = True
 
             db_file.save()
 
