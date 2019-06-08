@@ -47,7 +47,17 @@
       {% for file in shared_with_me %}
         <p>
           {{ file }}
+          {{ file.file.owner }}
         </p>
+
+        <form id="move-{{ file }}"
+              action="{% url 'mypage:move_file' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="file" value="{{file}}">
+          <button type="submit" form="move-{{ file }}">
+            Move
+          </button>
+        </form>
       {% endfor %}
       <hr>
         Shared Files

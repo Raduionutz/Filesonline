@@ -1,4 +1,4 @@
-import os
+import os, shutil
 
 from django.shortcuts import render
 from django.views import View
@@ -97,6 +97,7 @@ class DownloadFileView(LoginRequiredMixin, View):
 
         return HttpResponseRedirect(reverse('mypage:main_page'))
 
+
 class ShareFileView(LoginRequiredMixin, View):
 
     login_url = 'user/login/'
@@ -134,5 +135,38 @@ class ShareFileView(LoginRequiredMixin, View):
 
                 shared_file.save()
                 file_to_share.save()
+
+        return HttpResponseRedirect(reverse('mypage:main_page'))
+
+
+class MoveSharedFile(LoginRequiredMixin, View):
+
+    login_url = 'user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        file = request.POST.get('file')
+
+        print('ceva')
+
+        file_owner = SharedFileWith.objects.get(
+                shared_with=request.user,
+                file__filename=file
+        ).file.owner
+
+        print(file_owner)
+
+        file_path = os.path.join(file_owner.user_profile.folder, file)
+        dest_path = os.path.join(request.user.user_profile.folder, file)
+
+        if os.path.exists(file_path):
+            shutil.copyfile(file_path, dest_path)
+            db_file = File()
+
+            db_file.owner = request.user
+            db_file.filename = file
+
+            db_file.save()
 
         return HttpResponseRedirect(reverse('mypage:main_page'))
