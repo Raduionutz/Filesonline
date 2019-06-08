@@ -135,3 +135,6 @@ MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
 
 LOGIN_URL = 'user/login_do/'
+
+encrypt_password = "23r9f3u98hf49pg293hfh39vh8[23hvb9p2hg93fh349"
+encrypt_bufferSize = 64 * 1024

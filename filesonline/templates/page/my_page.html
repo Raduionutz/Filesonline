@@ -30,6 +30,37 @@
               O
             </button>
           </form>
+          {% if file.encrypted is False %}
+            <form id="encrypt-{{ file }}"
+                  action="{% url 'mypage:encrypt_file' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="file" value="{{file}}">
+              <button type="submit" form="encrypt-{{ file }}">
+                E
+              </button>
+            </form>
+          {% endif %}
+
+          {% if file.encrypted is True %}
+            <form id="decrypt-{{ file }}"
+                  action="{% url 'mypage:decrypt_file' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="file" value="{{file}}">
+              <button type="submit" form="decrypt-{{ file }}">
+                D
+              </button>
+            </form>
+
+            <form id="dec-download-{{ file }}"
+                  action="{% url 'mypage:dec-download_file' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="file" value="{{file}}">
+              <button type="submit" form="dec-download-{{ file }}">
+                Dec Down
+              </button>
+            </form>
+
+          {% endif %}
 
           <form id="share-{{ file }}"
                 action="{% url 'mypage:share_file' %}" method="post">

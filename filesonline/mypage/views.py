@@ -8,8 +8,10 @@ from django.shortcuts import reverse, HttpResponseRedirect, HttpResponse
 
 from file_upload.forms import UploadFileForm
 from file_upload.models import File, SharedFileWith
+from filesonline.utils import encrypt_file, decrypt_file
 
-class MainPageView(LoginRequiredMixin, View):
+
+class MainPage(LoginRequiredMixin, View):
 
     login_url = 'user/login/'
     redirect_field_name = 'index.html'
@@ -18,7 +20,9 @@ class MainPageView(LoginRequiredMixin, View):
 
         upload_form = UploadFileForm()
 
-        files = os.listdir(request.user.user_profile.folder)
+        # files = os.listdir(request.user.user_profile.folder)
+
+        files = File.objects.filter(owner=request.user)
 
         shared_by_me = request.user.files.filter(shared=True)
         shared_with_me = request.user.shared_with.all()
@@ -60,7 +64,8 @@ class MainPageView(LoginRequiredMixin, View):
 
         return HttpResponseRedirect(reverse('mypage:main_page'))
 
-class DeleteFileView(LoginRequiredMixin, View):
+
+class DeleteFile(LoginRequiredMixin, View):
 
     login_url = 'user/login/'
     redirect_field_name = 'index.html'
@@ -79,7 +84,7 @@ class DeleteFileView(LoginRequiredMixin, View):
         return HttpResponseRedirect(reverse('mypage:main_page'))
 
 
-class DownloadFileView(LoginRequiredMixin, View):
+class DownloadFile(LoginRequiredMixin, View):
 
     login_url = 'user/login/'
     redirect_field_name = 'index.html'
@@ -87,8 +92,9 @@ class DownloadFileView(LoginRequiredMixin, View):
     def post(self, request):
 
         file = request.POST.get('file')
-
         file_path = os.path.join(request.user.user_profile.folder, file)
+
+
         if os.path.exists(file_path):
             with open(file_path, 'rb') as fh:
                 response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
@@ -98,7 +104,33 @@ class DownloadFileView(LoginRequiredMixin, View):
         return HttpResponseRedirect(reverse('mypage:main_page'))
 
 
-class ShareFileView(LoginRequiredMixin, View):
+class DecryptDownloadFile(LoginRequiredMixin, View):
+
+    login_url = 'user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        file = request.POST.get('file')
+
+        db_file = File.objects.get(owner=request.user, filename=file)
+        if db_file.encrypted is False:
+            return DownloadFile().post(request)
+
+        file_path = os.path.join(request.user.user_profile.folder, file)
+
+        dec_path = decrypt_file(file_path)
+
+        with open(dec_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(dec_path)
+
+        os.remove(dec_path)
+
+        return response
+
+
+class ShareFile(LoginRequiredMixin, View):
 
     login_url = 'user/login/'
     redirect_field_name = 'index.html'
@@ -148,14 +180,10 @@ class MoveSharedFile(LoginRequiredMixin, View):
 
         file = request.POST.get('file')
 
-        print('ceva')
-
         file_owner = SharedFileWith.objects.get(
                 shared_with=request.user,
                 file__filename=file
         ).file.owner
-
-        print(file_owner)
 
         file_path = os.path.join(file_owner.user_profile.folder, file)
         dest_path = os.path.join(request.user.user_profile.folder, file)
@@ -168,5 +196,57 @@ class MoveSharedFile(LoginRequiredMixin, View):
             db_file.filename = file
 
             db_file.save()
+
+        return HttpResponseRedirect(reverse('mypage:main_page'))
+
+
+class EncryptFile(LoginRequiredMixin, View):
+
+    login_url = 'user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        file = request.POST.get('file')
+
+        db_file = File.objects.get(owner=request.user, filename=file)
+
+        if db_file.encrypted is False:
+            db_file.filename = db_file.filename + '.enc'
+            db_file.encrypted = True
+
+            file_path = os.path.join(request.user.user_profile.folder, file)
+
+            encrypt_file(file_path)
+
+            db_file.save()
+
+            os.remove(file_path)
+
+        return HttpResponseRedirect(reverse('mypage:main_page'))
+
+
+class DecryptFile(LoginRequiredMixin, View):
+
+    login_url = 'user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        file = request.POST.get('file')
+
+        db_file = File.objects.get(owner=request.user, filename=file)
+
+        if db_file.encrypted is True:
+            db_file.filename = db_file.filename[:-4]
+            db_file.encrypted = False
+
+            file_path = os.path.join(request.user.user_profile.folder, file)
+
+            decrypt_file(file_path)
+
+            db_file.save()
+
+            os.remove(file_path)
 
         return HttpResponseRedirect(reverse('mypage:main_page'))
