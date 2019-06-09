@@ -85,8 +85,10 @@ class DeleteFile(LoginRequiredMixin, View):
         if file:
             db_file = File.objects.filter(owner=request.user, filename=file, path=path)
 
+            print(db_file)
             db_file.delete()
 
+            print(os.path.join(os.path.join(request.user.user_profile.folder, path), file))
             os.remove(os.path.join(os.path.join(request.user.user_profile.folder, path), file))
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
@@ -205,7 +207,12 @@ class MoveSharedFile(LoginRequiredMixin, View):
         if os.path.exists(dest_path):
 
             dest_path, i = find_good_name(dest_path)
-            db_file.filename += '({})'.format(i)
+            base, ext = os.path.splitext(db_file.filename)
+            db_file.filename = ''.join([
+                base,
+                ' ({})'.format(i),
+                ext,
+            ])
 
         shared_file_obj = SharedFileWith.objects.get(
                 shared_with=request.user,
@@ -377,6 +384,7 @@ class DeleteDirectory(LoginRequiredMixin, View):
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
 
+
 class MoveToDirectory(LoginRequiredMixin, View):
 
     login_url = 'user/login/'
@@ -391,7 +399,6 @@ class MoveToDirectory(LoginRequiredMixin, View):
         if not file:
             return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
 
-
         file_obj = File.objects.get(owner=request.user, filename=file, path=path)
 
         if file_obj:
@@ -404,7 +411,12 @@ class MoveToDirectory(LoginRequiredMixin, View):
             if os.path.exists(new_path):
 
                 new_path, i = find_good_name(new_path)
-                file_obj.filename += '({})'.format(i)
+                base, ext = os.path.splitext(file_obj.filename)
+                file_obj.filename = ''.join([
+                    base,
+                    ' ({})'.format(i),
+                    ext,
+                ])
 
             os.rename(old_path, new_path)
 
@@ -413,3 +425,45 @@ class MoveToDirectory(LoginRequiredMixin, View):
             file_obj.save()
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+
+class CopyFile(LoginRequiredMixin, View):
+
+    login_url = 'user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        file = request.POST.get('file')
+        path = request.POST.get('path', '')
+
+        if not file:
+            return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
+
+        file_obj = File.objects.get(owner=request.user, filename=file, path=path)
+
+        if file_obj:
+            copy_file_obj = File()
+
+            file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
+
+            base_path, ext = os.path.splitext(file_path)
+            copy_path = base_path + ' - Copy' + ext
+
+
+            copy_file_obj.owner = request.user
+            copy_file_obj.filename = os.path.splitext(file)[0] + ' - Copy' + ext
+            copy_file_obj.path = file_obj.path
+
+            if os.path.exists(copy_path):
+                copy_path, i = find_good_name(copy_path)
+                copy_file_obj.filename = ''.join([
+                    os.path.splitext(copy_file_obj.filename)[0],
+                    ' ({})'.format(i),
+                    ext,
+                ])
+
+            shutil.copyfile(file_path, copy_path)
+
+            copy_file_obj.save()
+
+        return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))

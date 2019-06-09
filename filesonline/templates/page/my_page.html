@@ -13,7 +13,7 @@
       <form id="make_dir-{{ file }}"
             action="{% url 'mypage:make_dir' %}" method="post">
         {% csrf_token %}
-        <input type="text" name="dir" placeholder="dir name">
+        <input required type="text" name="dir" placeholder="dir name">
         <input type="hidden" name="path" value="{{ path }}">
         <button type="submit" form="make_dir-{{ file }}">
           Make New Dir
@@ -56,7 +56,7 @@
             <input type="hidden" name="file" value="{{ file }}">
             <input type="hidden" name="path" value="{{ path }}">
             <button type="submit" form="delete-{{ file }}">
-              X
+              Delete file
             </button>
           </form>
 
@@ -67,7 +67,17 @@
             <input type="hidden" name="path" value="{{ path }}">
 
             <button type="submit" form="download-{{ file }}">
-              O
+              Download
+            </button>
+          </form>
+          <form id="copy_file-{{ file }}"
+                action="{% url 'mypage:copy_file' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="file" value="{{ file }}">
+            <input type="hidden" name="path" value="{{ path }}">
+
+            <button type="submit" form="copy_file-{{ file }}">
+              Make copy
             </button>
           </form>
           {% if file.encrypted is False %}
@@ -78,7 +88,7 @@
               <input type="hidden" name="path" value="{{ path }}">
 
               <button type="submit" form="encrypt-{{ file }}">
-                E
+                Encrypt file
               </button>
             </form>
           {% endif %}
@@ -91,7 +101,7 @@
               <input type="hidden" name="path" value="{{ path }}">
 
               <button type="submit" form="decrypt-{{ file }}">
-                D
+                Dectypt file
               </button>
             </form>
 
@@ -102,7 +112,7 @@
               <input type="hidden" name="path" value="{{ path }}">
 
               <button type="submit" form="dec-download-{{ file }}">
-                Dec Down
+                Download decrypted
               </button>
             </form>
 
@@ -118,7 +128,7 @@
 
             <input type="text" name="share_with" placeholder="user to share with">
             <button type="submit" form="share-{{ file }}">
-              S
+              Share file
             </button>
           </form>
 
@@ -133,7 +143,7 @@
               {% endfor %}
             </select>
             <button type="submit" form="move_to_dir-{{ file }}">
-              Move to Dir
+              Move to Directory
             </button>
           </form>
         {% endif %}

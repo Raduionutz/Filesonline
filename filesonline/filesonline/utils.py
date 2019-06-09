@@ -20,10 +20,12 @@ def decrypt_file(encrypted_path):
 
 def find_good_name(path):
     i = 2
-    test_name = path + '({})'.format(i)
+
+    base, ext = os.path.splitext(path)
+    test_name = base + ' ({})'.format(i) + ext
     while os.path.exists(test_name):
         i += 1
-        test_name = path + '({})'.format(i)
+        test_name = base + ' ({})'.format(i) + ext
     path = test_name
 
     return path, i
