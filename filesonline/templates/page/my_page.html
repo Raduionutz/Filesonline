@@ -108,6 +108,8 @@
 
           {% endif %}
 
+
+
           <form id="share-{{ file }}"
                 action="{% url 'mypage:share_file' %}" method="post">
             {% csrf_token %}
@@ -117,6 +119,21 @@
             <input type="text" name="share_with" placeholder="user to share with">
             <button type="submit" form="share-{{ file }}">
               S
+            </button>
+          </form>
+
+          <form id="move_to_dir-{{ file }}"
+                action="{% url 'mypage:move_to_dir' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="file" value="{{ file }}">
+            <input type="hidden" name="path" value="{{ path }}">
+            <select name="new_dir" form="move_to_dir-{{ file }}">
+              {% for dir in directories %}
+                <option value="{{dir.filename}}">{{dir.filename}}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" form="move_to_dir-{{ file }}">
+              Move to Dir
             </button>
           </form>
         {% endif %}
@@ -137,9 +154,10 @@
           <input type="hidden" name="path" value="{{ path }}">
 
           <button type="submit" form="move-{{ file }}">
-            Move
+            Move to my folder
           </button>
         </form>
+
       {% endfor %}
       <hr>
         Shared Files
@@ -156,6 +174,8 @@
             {% csrf_token %}
             <input type = "submit" name="clic" value="here">
         </form>
+
+
     </div>
   </div>
 {% endblock %}

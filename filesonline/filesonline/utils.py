@@ -17,3 +17,13 @@ def decrypt_file(encrypted_path):
     pyAesCrypt.decryptFile(encrypted_path, dec_path, encrypt_password, encrypt_bufferSize)
 
     return dec_path
+
+def find_good_name(path):
+    i = 2
+    test_name = path + '({})'.format(i)
+    while os.path.exists(test_name):
+        i += 1
+        test_name = path + '({})'.format(i)
+    path = test_name
+
+    return path, i

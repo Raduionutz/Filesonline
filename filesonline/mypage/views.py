@@ -8,7 +8,7 @@ from django.shortcuts import reverse, HttpResponseRedirect, HttpResponse
 
 from file_upload.forms import UploadFileForm
 from file_upload.models import File, SharedFileWith
-from filesonline.utils import encrypt_file, decrypt_file
+from filesonline.utils import encrypt_file, decrypt_file, find_good_name
 
 
 class MainPage(LoginRequiredMixin, View):
@@ -22,12 +22,15 @@ class MainPage(LoginRequiredMixin, View):
 
         files = File.objects.filter(owner=request.user, path=path).order_by('-is_directory', '-filename')
 
+        directories = files.filter(is_directory=True)
+
         shared_by_me = request.user.files.filter(shared=True)
         shared_with_me = request.user.shared_with.all()
 
         context = {
             'path': path,
             'files': files,
+            'directories': directories,
             'upload_form': upload_form,
             'shared_by_me': shared_by_me,
             'shared_with_me': shared_with_me,
@@ -194,6 +197,16 @@ class MoveSharedFile(LoginRequiredMixin, View):
 
         dest_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
 
+        db_file = File()
+
+        db_file.owner = request.user
+        db_file.filename = file
+
+        if os.path.exists(dest_path):
+
+            dest_path, i = find_good_name(dest_path)
+            db_file.filename += '({})'.format(i)
+
         shared_file_obj = SharedFileWith.objects.get(
                 shared_with=request.user,
                 file__filename=file
@@ -207,10 +220,6 @@ class MoveSharedFile(LoginRequiredMixin, View):
 
         if os.path.exists(file_path):
             shutil.copyfile(file_path, dest_path)
-            db_file = File()
-
-            db_file.owner = request.user
-            db_file.filename = file
             db_file.path = path
 
 
@@ -366,7 +375,41 @@ class DeleteDirectory(LoginRequiredMixin, View):
 
             dir_obj.delete()
 
-        print(path)
+        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
 
+class MoveToDirectory(LoginRequiredMixin, View):
+
+    login_url = 'user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        file = request.POST.get('file')
+        path = request.POST.get('path', '')
+        new_dir = request.POST.get('new_dir')
+
+        if not file:
+            return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
+
+
+        file_obj = File.objects.get(owner=request.user, filename=file, path=path)
+
+        if file_obj:
+            old_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
+            new_path = os.path.join(
+                os.path.join(os.path.join(request.user.user_profile.folder, path), new_dir),
+                file,
+            )
+
+            if os.path.exists(new_path):
+
+                new_path, i = find_good_name(new_path)
+                file_obj.filename += '({})'.format(i)
+
+            os.rename(old_path, new_path)
+
+            file_obj.path = os.path.join(file_obj.path, new_dir)
+
+            file_obj.save()
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))

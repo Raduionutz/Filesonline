@@ -15,4 +15,5 @@ urlpatterns = [
     path('make_dir', views.MakeDirectory.as_view(), name='make_dir'),
     path('change_dir', views.ChangeDirectory.as_view(), name='change_dir'),
     path('delete_dir', views.DeleteDirectory.as_view(), name='delete_dir'),
+    path('move_to_dir', views.MoveToDirectory.as_view(), name='move_to_dir'),
 ]
