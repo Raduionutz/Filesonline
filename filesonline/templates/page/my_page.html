@@ -8,12 +8,48 @@
       {{ user.username }}
       <!--<img src="{{ user.user_profile.user_picture }}" alt="">-->
       {{ user.user_profile.user_picture }}
+      <hr>
+
+      <form id="make_dir-{{ file }}"
+            action="{% url 'mypage:make_dir' %}" method="post">
+        {% csrf_token %}
+        <input type="text" name="dir" placeholder="dir name">
+        <input type="hidden" name="path" value="{{ path }}">
+        <button type="submit" form="make_dir-{{ file }}">
+          Make New Dir
+        </button>
+      </form>
 
       <hr>
       {% for file in files %}
-        <p>
-          {{ file }}
-        </p>
+        <hr>
+          {% if file.is_directory %}
+            Directory:
+            <h1>
+              {{ file }}
+            </h1>
+            <form id="change_dir-{{ file }}"
+                  action="{% url 'mypage:change_dir' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="dir" value="{{ file }}">
+              <input type="hidden" name="path" value="{{ path }}">
+              <button type="submit" form="change_dir-{{ file }}">
+                Enter Directory
+              </button>
+            </form>
+            <form id="delete_dir-{{ file }}"
+                  action="{% url 'mypage:delete_dir' %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="dir" value="{{ file }}">
+              <input type="hidden" name="path" value="{{ path }}">
+              <button type="submit" form="delete_dir-{{ file }}">
+                Delete Directory
+              </button>
+            </form>
+          {% else %}
+            <p>
+              {{ file }}
+            </p>
           <form id="delete-{{ file }}"
                 action="{% url 'mypage:delete_file' %}" method="post">
             {% csrf_token %}
@@ -83,6 +119,7 @@
               S
             </button>
           </form>
+        {% endif %}
       {% endfor %}
 
       <hr>
@@ -97,6 +134,7 @@
               action="{% url 'mypage:move_file' %}" method="post">
           {% csrf_token %}
           <input type="hidden" name="file" value="{{ file }}">
+          <input type="hidden" name="path" value="{{ path }}">
 
           <button type="submit" form="move-{{ file }}">
             Move

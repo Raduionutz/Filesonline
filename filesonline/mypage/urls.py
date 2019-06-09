@@ -12,4 +12,7 @@ urlpatterns = [
     path('encrypt_file', views.EncryptFile.as_view(), name='encrypt_file'),
     path('decrypt_file', views.DecryptFile.as_view(), name='decrypt_file'),
     path('dec-download_file', views.DecryptDownloadFile.as_view(), name='dec-download_file'),
+    path('make_dir', views.MakeDirectory.as_view(), name='make_dir'),
+    path('change_dir', views.ChangeDirectory.as_view(), name='change_dir'),
+    path('delete_dir', views.DeleteDirectory.as_view(), name='delete_dir'),
 ]

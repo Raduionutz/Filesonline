@@ -20,7 +20,7 @@ class MainPage(LoginRequiredMixin, View):
 
         upload_form = UploadFileForm()
 
-        files = File.objects.filter(owner=request.user, path=path)
+        files = File.objects.filter(owner=request.user, path=path).order_by('-is_directory', '-filename')
 
         shared_by_me = request.user.files.filter(shared=True)
         shared_with_me = request.user.shared_with.all()
@@ -190,8 +190,9 @@ class MoveSharedFile(LoginRequiredMixin, View):
     def post(self, request):
 
         file = request.POST.get('file')
+        path = request.POST.get('path', '')
 
-        dest_path = os.path.join(request.user.user_profile.folder, file)
+        dest_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
 
         shared_file_obj = SharedFileWith.objects.get(
                 shared_with=request.user,
@@ -210,6 +211,7 @@ class MoveSharedFile(LoginRequiredMixin, View):
 
             db_file.owner = request.user
             db_file.filename = file
+            db_file.path = path
 
 
             if shared_file_obj.file.encrypted:
@@ -217,7 +219,7 @@ class MoveSharedFile(LoginRequiredMixin, View):
 
             db_file.save()
 
-        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': ''}))
+        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
 
 
 class EncryptFile(LoginRequiredMixin, View):
@@ -232,7 +234,7 @@ class EncryptFile(LoginRequiredMixin, View):
         file = request.POST.get('file')
         path = request.POST.get('path', '')
 
-        db_file = File.objects.get(owner=request.user, filename=file)
+        db_file = File.objects.get(owner=request.user, filename=file, path=path)
 
         if db_file.encrypted is False:
             db_file.filename = db_file.filename + '.enc'
@@ -259,7 +261,7 @@ class DecryptFile(LoginRequiredMixin, View):
         file = request.POST.get('file')
         path = request.POST.get('path', '')
 
-        db_file = File.objects.get(owner=request.user, filename=file)
+        db_file = File.objects.get(owner=request.user, filename=file, path=path)
 
         if db_file.encrypted is True:
             db_file.filename = db_file.filename[:-4]
@@ -272,5 +274,99 @@ class DecryptFile(LoginRequiredMixin, View):
             db_file.save()
 
             os.remove(file_path)
+
+        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+
+class MakeDirectory(LoginRequiredMixin, View):
+
+    login_url = 'user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        dir = request.POST.get('dir')
+        path = request.POST.get('path', '')
+
+        dir_obj = File.objects.filter(owner=request.user, filename=dir, path=path, is_directory=True)
+
+        if not dir_obj:
+            new_dir = File()
+
+            new_dir.owner = request.user
+            new_dir.filename = dir
+            new_dir.path = path
+            new_dir.is_directory = True
+
+            dir_path = os.path.join(os.path.join(request.user.user_profile.folder, path), dir)
+
+            os.mkdir(dir_path)
+
+            new_dir.save()
+
+        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+
+
+class ChangeDirectory(LoginRequiredMixin, View):
+
+    login_url = 'user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        dir = request.POST.get('dir')
+        path = request.POST.get('path', '')
+
+        if not dir:
+            return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
+
+        dir_obj = File.objects.get(owner=request.user, filename=dir, path=path, is_directory=True)
+
+        if dir_obj:
+
+            path = os.path.join(dir_obj.path, dir)
+
+
+        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+
+
+class DeleteDirectory(LoginRequiredMixin, View):
+
+    login_url = 'user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        dir = request.POST.get('dir')
+        path = request.POST.get('path', '')
+
+        if not dir:
+            return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
+
+        dir_obj = File.objects.get(owner=request.user, filename=dir, path=path, is_directory=True)
+
+        if dir_obj:
+
+            shutil.rmtree(os.path.join(os.path.join(request.user.user_profile.folder, path), dir))
+
+            paths_to_delete = [os.path.join(dir_obj.path, dir_obj.filename)]
+
+            user_files = File.objects.filter(owner=request.user)
+
+            while paths_to_delete:
+
+                searched_path = paths_to_delete.pop()
+
+                files = user_files.filter(path=searched_path)
+
+                for file in files:
+                    if file.is_directory:
+                        paths_to_delete.append(os.path.join(searched_path, file.filename))
+
+                    file.delete()
+
+            dir_obj.delete()
+
+        print(path)
+
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
