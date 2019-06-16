@@ -17,9 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from mypage.views import RedirectHome
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include(('user_login.urls', 'user_login'), namespace='user_login')),
     path('upload/', include(('file_upload.urls', 'file_upload'), namespace='file_upload')),
     path('me/', include(('mypage.urls', 'mypage'), namespace='mypage')),
+    path('', RedirectHome.as_view(), name='home')
 ]

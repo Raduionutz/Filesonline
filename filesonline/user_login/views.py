@@ -1,4 +1,4 @@
-import os, time
+import os, random, string, time
 
 from django.shortcuts import render
 from .forms import RegForm, ExtraRegForm
@@ -27,32 +27,19 @@ def register(request):
 
     if request.method == 'POST':
 
-        # Get info from "both" forms
         user_form = RegForm(data=request.POST)
         profile_form = ExtraRegForm(data=request.POST)
 
-        # Check to see both forms are valid
         if user_form.is_valid() and profile_form.is_valid():
 
-            # Save User Form to Database
             user = user_form.save()
-
-            # Hash the password
             user.set_password(user.password)
 
-            # Update with Hashed password
             user.save()
 
-            # Now we deal with the extra info!
-
-            # Can't commit yet because we still need to manipulate
             profile = profile_form.save(commit=False)
-
-            # Set One to One relationship between
-            # UserForm and UserProfileInfoForm
             profile.user = user
 
-            # Check if they provided a profile picture
             if 'user_picture' in request.FILES:
 
                 photo = request.FILES['user_picture']
@@ -66,6 +53,9 @@ def register(request):
 
                 profile.user_picture = photo
 
+            profile.enc_pass = ''.join(
+                random.choices(string.ascii_letters + string.digits, k=100),
+            )
 
             profile.folder = os.path.join(os.path.join('media', 'user_files'), str(user.pk))
             os.mkdir(profile.folder)
@@ -75,11 +65,9 @@ def register(request):
             registered = True
 
         else:
-            # One of the forms was invalid if this gets called.
             print(user_form.errors,profile_form.errors)
 
     else:
-        # Was not an HTTP post so we just render the forms as blank.
         user_form = RegForm()
         profile_form = ExtraRegForm()
 
@@ -97,28 +85,19 @@ def register(request):
 def login_user(request):
 
     if request.method == 'POST':
-        # First get the username and password supplied
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Django's built-in authentication function:
         user = authenticate(username=username, password=password)
 
-        # If we have a user
         if user:
-            #Check it the account is active
             if user.is_active:
-                # Log the user in.
                 login(request,user)
-                # Send the user back to some page.
-                # In this case their homepage.
                 return HttpResponseRedirect(reverse('user_login:index'))
             else:
-                # If account is not active:
                 return HttpResponse('Your account is not active.')
         else:
             return HttpResponse('Invalid login details supplied.')
 
     else:
-        #Nothing has been provided for username or password.
         return render(request, 'user_login/login.html', {})

@@ -5,15 +5,24 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.shortcuts import reverse, HttpResponseRedirect, HttpResponse
+from django.core.exceptions import ObjectDoesNotExist
 
 from file_upload.forms import UploadFileForm
 from file_upload.models import File, SharedFileWith
 from filesonline.utils import encrypt_file, decrypt_file, find_good_name
 
 
+class RedirectHome(LoginRequiredMixin, View):
+
+    login_url = '/user/login/'
+    redirect_field_name = 'index.html'
+
+    def get(self, request):
+        return HttpResponseRedirect(reverse('mypage:main_page'))
+
 class MainPage(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def get(self, request, path=''):
@@ -61,6 +70,13 @@ class MainPage(LoginRequiredMixin, View):
                     os.path.join(os.path.join(request.user.user_profile.folder, path), f.name)
                 )
 
+                try:
+                    existing = File.objects.get(owner=request.user, filename=f.name)
+                    if existing:
+                        existing.delete()
+                except ObjectDoesNotExist:
+                    pass
+
                 db_file = File()
 
                 db_file.owner = request.user
@@ -74,7 +90,7 @@ class MainPage(LoginRequiredMixin, View):
 
 class DeleteFile(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -96,7 +112,7 @@ class DeleteFile(LoginRequiredMixin, View):
 
 class DownloadFile(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -118,7 +134,7 @@ class DownloadFile(LoginRequiredMixin, View):
 
 class DecryptDownloadFile(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -131,7 +147,7 @@ class DecryptDownloadFile(LoginRequiredMixin, View):
         if db_file.encrypted is False:
             return DownloadFile().post(request)
 
-        dec_path = decrypt_file(file_path)
+        dec_path = decrypt_file(file_path, request.user)
 
         with open(dec_path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")
@@ -144,7 +160,7 @@ class DecryptDownloadFile(LoginRequiredMixin, View):
 
 class ShareFile(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -189,7 +205,7 @@ class ShareFile(LoginRequiredMixin, View):
 
 class MoveSharedFile(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -240,7 +256,7 @@ class MoveSharedFile(LoginRequiredMixin, View):
 
 class EncryptFile(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -258,7 +274,7 @@ class EncryptFile(LoginRequiredMixin, View):
 
             file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
 
-            encrypt_file(file_path)
+            encrypt_file(file_path, request.user)
 
             db_file.save()
 
@@ -269,7 +285,7 @@ class EncryptFile(LoginRequiredMixin, View):
 
 class DecryptFile(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -285,7 +301,7 @@ class DecryptFile(LoginRequiredMixin, View):
 
             file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
 
-            decrypt_file(file_path)
+            decrypt_file(file_path, request.user)
 
             db_file.save()
 
@@ -295,7 +311,7 @@ class DecryptFile(LoginRequiredMixin, View):
 
 class MakeDirectory(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -324,7 +340,7 @@ class MakeDirectory(LoginRequiredMixin, View):
 
 class ChangeDirectory(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -347,7 +363,7 @@ class ChangeDirectory(LoginRequiredMixin, View):
 
 class DeleteDirectory(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -387,7 +403,7 @@ class DeleteDirectory(LoginRequiredMixin, View):
 
 class MoveToDirectory(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
@@ -426,9 +442,10 @@ class MoveToDirectory(LoginRequiredMixin, View):
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
 
+
 class CopyFile(LoginRequiredMixin, View):
 
-    login_url = 'user/login/'
+    login_url = '/user/login/'
     redirect_field_name = 'index.html'
 
     def post(self, request):
