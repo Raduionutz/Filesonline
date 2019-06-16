@@ -4,6 +4,10 @@ import pyAesCrypt
 
 from filesonline.settings import encrypt_password, encrypt_bufferSize
 
+from filesonline.settings import (IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS,
+    EXCEL_EXTENSIONS, WORD_EXTENSIONS, POWERPOINT_EXTENSIONS, PDF_EXTENSIONS,
+    CODING_EXTENSIONS, ARCHIVE_EXTENSIONS)
+
 
 def get_user_encrypt_password(user):
 
@@ -26,6 +30,7 @@ def decrypt_file(encrypted_path, user):
 
     return dec_path
 
+
 def find_good_name(path):
     i = 2
 
@@ -37,3 +42,35 @@ def find_good_name(path):
     path = test_name
 
     return path, i
+
+
+def get_file_type(ext):
+
+    if ext in AUDIO_EXTENSIONS:
+        return 'audio'
+
+    if ext in IMAGE_EXTENSIONS:
+        return 'image'
+
+    if ext in VIDEO_EXTENSIONS:
+        return 'video'
+
+    if ext in EXCEL_EXTENSIONS:
+        return 'excel'
+
+    if ext in WORD_EXTENSIONS:
+        return 'word'
+
+    if ext in POWERPOINT_EXTENSIONS:
+        return 'power'
+
+    if ext in PDF_EXTENSIONS:
+        return 'pdf'
+
+    if ext in CODING_EXTENSIONS:
+        return 'code'
+
+    if ext in ARCHIVE_EXTENSIONS:
+        return 'archive'
+
+    return 'file'

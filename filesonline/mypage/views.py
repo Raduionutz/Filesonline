@@ -9,7 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from file_upload.forms import UploadFileForm
 from file_upload.models import File, SharedFileWith
-from filesonline.utils import encrypt_file, decrypt_file, find_good_name
+from filesonline.utils import encrypt_file, decrypt_file, find_good_name, get_file_type
 
 
 class RedirectHome(LoginRequiredMixin, View):
@@ -19,6 +19,7 @@ class RedirectHome(LoginRequiredMixin, View):
 
     def get(self, request):
         return HttpResponseRedirect(reverse('mypage:main_page'))
+
 
 class MainPage(LoginRequiredMixin, View):
 
@@ -61,10 +62,10 @@ class MainPage(LoginRequiredMixin, View):
                         destination.write(chunk)
 
             for f in files:
-                print(os.path.join(request.user.user_profile.folder))
-                print(path)
-
-                print(os.path.join(os.path.join(request.user.user_profile.folder, path), f.name))
+                # print(os.path.join(request.user.user_profile.folder))
+                # print(path)
+                #
+                # print(os.path.join(os.path.join(request.user.user_profile.folder, path), f.name))
                 handle_uploaded_file(
                     request.FILES['file'],
                     os.path.join(os.path.join(request.user.user_profile.folder, path), f.name)
@@ -82,6 +83,8 @@ class MainPage(LoginRequiredMixin, View):
                 db_file.owner = request.user
                 db_file.filename = f.name
                 db_file.path = path
+                print(os.path.splitext(f.name)[1])
+                db_file.file_type = get_file_type(os.path.splitext(f.name)[1])
 
                 db_file.save()
 

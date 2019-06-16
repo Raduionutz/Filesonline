@@ -81,7 +81,28 @@
     {% else %}
     <div class="file-div">
       <div class="file_icon-div">
+
+        {% if file.file_type == 'audio' %}
+        <i class="fas fa-file-audio"></i>
+        {% elif file.file_type == 'image' %}
+        <i class="fas fa-file-image"></i>
+        {% elif file.file_type == 'video' %}
+        <i class="fas fa-file-video"></i>
+        {% elif file.file_type == 'word' %}
+        <i class="fas fa-file-word"></i>
+        {% elif file.file_type == 'power' %}
+        <i class="fas fa-file-powerpoint"></i>
+        {% elif file.file_type == 'pdf' %}
+        <i class="fas fa-file-pdf"></i>
+        {% elif file.file_type == 'excel' %}
+        <i class="fas fa-file-excel"></i>
+        {% elif file.file_type == 'code' %}
+        <i class="fas fa-file-code"></i>
+        {% elif file.file_type == 'archive' %}
+        <i class="fas fa-file-archive"></i>
+        {% else %}
         <i class="fas fa-file"></i>
+        {% endif %}
       </div>
       <p>
         {{ file }}
@@ -117,16 +138,16 @@
         </button>
       </form>
       {% if file.encrypted is False %}
-        <form class="dispinline" id="encrypt-{{ file }}"
-              action="{% url 'mypage:encrypt_file' %}" method="post">
-          {% csrf_token %}
-          <input type="hidden" name="file" value="{{ file }}">
-          <input type="hidden" name="path" value="{{ path }}">
+      <form class="dispinline" id="encrypt-{{ file }}"
+            action="{% url 'mypage:encrypt_file' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="file" value="{{ file }}">
+        <input type="hidden" name="path" value="{{ path }}">
 
-          <button type="submit" form="encrypt-{{ file }}">
-            Encrypt file
-          </button>
-        </form>
+        <button type="submit" form="encrypt-{{ file }}">
+          Encrypt file
+        </button>
+      </form>
       {% endif %}
 
       {% if file.encrypted is True %}
@@ -152,35 +173,35 @@
         </button>
       </form>
 
-    {% endif %}
+      {% endif %}
 
 
-    <form id="share-{{ file }}"
-          action="{% url 'mypage:share_file' %}" method="post">
-      {% csrf_token %}
-      <input type="hidden" name="file" value="{{ file }}">
-      <input type="hidden" name="path" value="{{ path }}">
+      <form id="share-{{ file }}"
+            action="{% url 'mypage:share_file' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="file" value="{{ file }}">
+        <input type="hidden" name="path" value="{{ path }}">
 
-      <input type="text" name="share_with" placeholder="user to share with">
-      <button type="submit" form="share-{{ file }}">
-        <i class="fas fa-share-alt"></i>
-      </button>
-    </form>
+        <input type="text" name="share_with" placeholder="user to share with">
+        <button type="submit" form="share-{{ file }}">
+          <i class="fas fa-share-alt"></i>
+        </button>
+      </form>
 
-    <form class="dispinline" id="move_to_dir-{{ file }}"
-          action="{% url 'mypage:move_to_dir' %}" method="post">
-      {% csrf_token %}
-      <input type="hidden" name="file" value="{{ file }}">
-      <input type="hidden" name="path" value="{{ path }}">
-      <select name="new_dir" form="move_to_dir-{{ file }}">
-        {% for dir in directories %}
-        <option value="{{dir.filename}}">{{dir.filename}}</option>
-        {% endfor %}
-      </select>
-      <button type="submit" form="move_to_dir-{{ file }}">
-        Move to Directory
-      </button>
-    </form>
+      <form class="dispinline" id="move_to_dir-{{ file }}"
+            action="{% url 'mypage:move_to_dir' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="file" value="{{ file }}">
+        <input type="hidden" name="path" value="{{ path }}">
+        <select name="new_dir" form="move_to_dir-{{ file }}">
+          {% for dir in directories %}
+          <option value="{{dir.filename}}">{{dir.filename}}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" form="move_to_dir-{{ file }}">
+          Move to Directory
+        </button>
+      </form>
 
 
     </div>

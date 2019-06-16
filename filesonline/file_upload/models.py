@@ -10,7 +10,8 @@ class File(models.Model):
     shared = models.BooleanField(default=False)
     encrypted = models.BooleanField(default=False)
     is_directory = models.BooleanField(default=False)
-    path = models.CharField(max_length=265, default='')
+    path = models.CharField(max_length=256, default='')
+    file_type = models.CharField(max_length=256)
 
     def __str__(self):
         return self.filename

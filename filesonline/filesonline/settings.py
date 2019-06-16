@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import mimetypes
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -138,3 +139,40 @@ LOGIN_URL = 'user/login_do/'
 
 encrypt_password = "23r9f3u98hf49pg293hfh39vh8[23hvb9p2hg93fh349"
 encrypt_bufferSize = 64 * 1024
+
+IMAGE_EXTENSIONS = [
+    '.jpg', '.png', '.jpeg', '.bmp', '.gif', '.heic'
+]
+
+VIDEO_EXTENSIONS = [
+    '.mp4', '.mkv', '.avi', '.webm', '.flv', '.wmw', '.3gp',
+]
+
+AUDIO_EXTENSIONS = [
+    '.mp3', '.aac', '.m4a',
+]
+
+WORD_EXTENSIONS = [
+    '.doc', '.docx',
+]
+
+POWERPOINT_EXTENSIONS = [
+    '.ppt', '.pptx',
+]
+
+EXCEL_EXTENSIONS = [
+    '.xlsx', '.xls',
+]
+
+PDF_EXTENSIONS = [
+    '.pdf',
+]
+
+CODING_EXTENSIONS = [
+    '.py', '.c', '.cpp', '.html', '.css',
+]
+
+ARCHIVE_EXTENSIONS = [
+    '.zip', '.rar', '.iso', '.tar', '.gz', '.7z', '.jar', '.tar.gz', '.tgz', '.tar.Z', '.tar.bz2',
+'.tbz2', '.tar.lzma', '.tlz', '.tar.xz', '.txz'
+]
