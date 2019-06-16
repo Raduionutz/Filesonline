@@ -4,7 +4,7 @@ from . import views
 app_name = 'mypage'
 
 urlpatterns = [
-    re_path(r'folder?/(?P<path>.*)', views.MainPage.as_view(), name='main_page'),
+    re_path(r'folder/(?P<path>.*)', views.MainPage.as_view(), name='main_page'),
     path('delete_file', views.DeleteFile.as_view(), name='delete_file'),
     path('download_file', views.DownloadFile.as_view(), name='download_file'),
     path('share_file', views.ShareFile.as_view(), name='share_file'),
@@ -17,4 +17,5 @@ urlpatterns = [
     path('change_dir', views.ChangeDirectory.as_view(), name='change_dir'),
     path('delete_dir', views.DeleteDirectory.as_view(), name='delete_dir'),
     path('move_to_dir', views.MoveToDirectory.as_view(), name='move_to_dir'),
+    path('unshare_file', views.UnshareFile.as_view(), name='unshare_file'),
 ]

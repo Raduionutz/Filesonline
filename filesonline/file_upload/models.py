@@ -13,6 +13,7 @@ class File(models.Model):
     path = models.CharField(max_length=256, default='')
     file_type = models.CharField(max_length=256)
     size = models.CharField(max_length=32)
+    hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return self.filename

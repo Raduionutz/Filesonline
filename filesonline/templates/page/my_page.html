@@ -44,11 +44,11 @@
   }
 
   .file-buttons-div {
-    display: inline!important;
+    display: inline !important;
   }
 
   .file-info-div {
-    display: inline!important;
+    display: inline !important;
     padding: 80px;
   }
 
@@ -158,7 +158,7 @@
           <input type="hidden" name="path" value="{{ path }}">
 
           <button class="btn btn-primary" type="submit" form="download-{{ file }}">
-            <i class="fas fa-cloud-download-alt"></i>
+            <i class="fas fa-download"></i>
           </button>
         </form>
         <form class="dispinline" id="copy_file-{{ file }}"
@@ -251,7 +251,7 @@
     {% endfor %}
 
     <hr>
-    Files shared with me
+    <strong>Files shared with me</strong>
     {% for file in shared_with_me %}
     <p>
       {{ file }}
@@ -271,21 +271,37 @@
 
     {% endfor %}
     <hr>
-    Shared Files
+    <strong>Shared Files</strong>
     {% for file in shared_by_me %}
-    <p>
-      {{ file }}
-    </p>
+    <p>{{ file }}</p>
+    {% for instance in file.instances.all %}
+    {{ instance.shared_with }}
+
+    <form class="dispinline" id="unshare-{{ file }}"
+          action="{% url 'mypage:unshare_file' %}" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="file" value="{{ file }}">
+      <input type="hidden" name="path" value="{{ path }}">
+      <input type="hidden" name="user" value="{{ instance.shared_with.pk }}">
+
+      <button class="btn btn-primary" type="submit" form="unshare-{{ file }}">
+        X
+      </button>
+    </form>
+    <br>
+    {% endfor %}
+    <br>
     {% endfor %}
     <hr>
-    <p>Incarcare fisier nou:</p>
-
+    <strong>Incarcare fisier nou:</strong>
+    <br>
+    <br>
     <form id="upload-file-form" class="dispinline" method="POST" enctype="multipart/form-data">
       {{ upload_form.as_p }}
       {% csrf_token %}
     </form>
     <button class="btn btn-primary" type="submit" form="upload-file-form">
-      <i class="fas fa-cloud-upload-alt"></i>
+      <i class="fas fa-upload"></i>
     </button>
 
 

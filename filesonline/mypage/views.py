@@ -35,6 +35,11 @@ class MainPage(LoginRequiredMixin, View):
         directories = files.filter(is_directory=True)
 
         shared_by_me = request.user.files.filter(shared=True)
+
+        for file in shared_by_me:
+            for i in file.instances.all():
+                print(i.shared_with)
+
         shared_with_me = request.user.shared_with.all()
 
         context = {
@@ -224,6 +229,7 @@ class MoveSharedFile(LoginRequiredMixin, View):
         db_file.owner = request.user
         db_file.filename = file
 
+
         if os.path.exists(dest_path):
 
             dest_path, i = find_good_name(dest_path)
@@ -238,6 +244,10 @@ class MoveSharedFile(LoginRequiredMixin, View):
                 shared_with=request.user,
                 file__filename=file
         )
+
+
+        db_file.file_type = shared_file_obj.file.file_type
+        db_file.size = shared_file_obj.file.size
 
         file_owner = shared_file_obj.file.owner
         file_path = os.path.join(
@@ -312,6 +322,7 @@ class DecryptFile(LoginRequiredMixin, View):
             os.remove(file_path)
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+
 
 class MakeDirectory(LoginRequiredMixin, View):
 
@@ -474,6 +485,8 @@ class CopyFile(LoginRequiredMixin, View):
             copy_file_obj.owner = request.user
             copy_file_obj.filename = os.path.splitext(file)[0] + ' - Copy' + ext
             copy_file_obj.path = file_obj.path
+            copy_file_obj.file_type = file_obj.file_type
+            copy_file_obj.size = file_obj.size
 
             if os.path.exists(copy_path):
                 copy_path, i = find_good_name(copy_path)
@@ -488,3 +501,48 @@ class CopyFile(LoginRequiredMixin, View):
             copy_file_obj.save()
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
+
+
+class HideFile(LoginRequiredMixin, View):
+
+    login_url = '/user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        file = request.POST.get('file')
+        path = request.POST.get('path', '')
+
+        if not file:
+            return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
+
+        file_obj = File.objects.get(owner=request.user, filename=file, path=path)
+        file_obj.hidden = True
+
+
+class UnshareFile(LoginRequiredMixin, View):
+
+    login_url = '/user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        user_pk = request.POST.get('user')
+        file = request.POST.get('file')
+        path = request.POST.get('path')
+
+        try:
+            file_obj = File.objects.get(owner=request.user, filename=file)
+            user_obj = User.objects.get(pk=user_pk)
+
+            obj = SharedFileWith.objects.get(file=file_obj, shared_with=user_obj)
+            obj.delete()
+
+            if not file_obj.instances.all():
+                file_obj.shared = False
+                file_obj.save()
+
+        except ObjectDoesNotExist:
+            pass
+
+        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
