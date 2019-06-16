@@ -12,6 +12,7 @@ class File(models.Model):
     is_directory = models.BooleanField(default=False)
     path = models.CharField(max_length=256, default='')
     file_type = models.CharField(max_length=256)
+    size = models.CharField(max_length=32)
 
     def __str__(self):
         return self.filename

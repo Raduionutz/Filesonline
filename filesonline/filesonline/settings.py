@@ -153,7 +153,7 @@ AUDIO_EXTENSIONS = [
 ]
 
 WORD_EXTENSIONS = [
-    '.doc', '.docx',
+    '.doc', '.docx', '.odt',
 ]
 
 POWERPOINT_EXTENSIONS = [
@@ -174,5 +174,5 @@ CODING_EXTENSIONS = [
 
 ARCHIVE_EXTENSIONS = [
     '.zip', '.rar', '.iso', '.tar', '.gz', '.7z', '.jar', '.tar.gz', '.tgz', '.tar.Z', '.tar.bz2',
-'.tbz2', '.tar.lzma', '.tlz', '.tar.xz', '.txz'
+    '.tbz2', '.tar.lzma', '.tlz', '.tar.xz', '.txz'
 ]

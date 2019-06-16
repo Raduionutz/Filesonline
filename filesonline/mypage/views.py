@@ -9,7 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from file_upload.forms import UploadFileForm
 from file_upload.models import File, SharedFileWith
-from filesonline.utils import encrypt_file, decrypt_file, find_good_name, get_file_type
+from filesonline.utils import encrypt_file, decrypt_file, find_good_name, get_file_type, human_readable_size
 
 
 class RedirectHome(LoginRequiredMixin, View):
@@ -85,6 +85,7 @@ class MainPage(LoginRequiredMixin, View):
                 db_file.path = path
                 print(os.path.splitext(f.name)[1])
                 db_file.file_type = get_file_type(os.path.splitext(f.name)[1])
+                db_file.size = human_readable_size(f.size)
 
                 db_file.save()
 

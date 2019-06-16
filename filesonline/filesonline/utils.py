@@ -74,3 +74,11 @@ def get_file_type(ext):
         return 'archive'
 
     return 'file'
+
+
+def human_readable_size(size):
+
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if size < 1024 or unit == 'TB':
+            return ''.join(["%.2f" % size, unit])
+        size /= 1024
