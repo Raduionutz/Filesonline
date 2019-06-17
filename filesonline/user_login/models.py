@@ -11,6 +11,7 @@ class UserExtraInfo(models.Model):
     user_picture = models.ImageField(upload_to='profile_pics', blank=True)
     folder = models.CharField(max_length=256, default='media')
     enc_pass = models.CharField(max_length=256)
+    vault_key = models.CharField(max_length=256, default='parola')
 
     def __str__(self):
         return self.user.username

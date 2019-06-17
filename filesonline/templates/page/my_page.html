@@ -72,6 +72,23 @@
     {{ user.user_profile.user_picture }}
     <hr>
 
+    Vault Access:
+    {% if vault_access %}
+      Oui
+    {% else %}
+      Non
+    {% endif %}
+
+    <form id="enter-vault-form"
+          action="{% url 'mypage:enter_vault' %}" method="post">
+      {% csrf_token %}
+      <input required type="password" name="vault_key" placeholder="vault key">
+      <input type="hidden" name="path" value="{{ path }}">
+      <button class="btn btn-primary" type="submit" form="enter-vault-form">
+        ceva
+      </button>
+    </form>
+
     <form id="make_dir-{{ file }}"
           action="{% url 'mypage:make_dir' %}" method="post">
       {% csrf_token %}
@@ -219,6 +236,16 @@
           <input type="text" name="share_with" placeholder="user to share with">
           <button class="btn btn-primary" type="submit" form="share-{{ file }}">
             <i class="fas fa-share-alt"></i>
+          </button>
+        </form>
+        <form id="hide-{{ file }}"
+              action="{% url 'mypage:hide_file' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="file" value="{{ file }}">
+          <input type="hidden" name="path" value="{{ path }}">
+
+          <button class="btn btn-primary" type="submit" form="hide-{{ file }}">
+            <i class="fas fa-eye-slash"></i>
           </button>
         </form>
 

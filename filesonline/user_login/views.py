@@ -59,6 +59,7 @@ def register(request):
 
             profile.folder = os.path.join(os.path.join('media', 'user_files'), str(user.pk))
             os.mkdir(profile.folder)
+            os.mkdir(profile.folder + '_vault')
 
             profile.save()
 

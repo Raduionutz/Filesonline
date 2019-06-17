@@ -176,3 +176,6 @@ ARCHIVE_EXTENSIONS = [
     '.zip', '.rar', '.iso', '.tar', '.gz', '.7z', '.jar', '.tar.gz', '.tgz', '.tar.Z', '.tar.bz2',
     '.tbz2', '.tar.lzma', '.tlz', '.tar.xz', '.txz'
 ]
+
+token_sign_key = 'sadaso0238yrrgiUY2hfb28GYdfgwFU'
+token_expiration = 1000

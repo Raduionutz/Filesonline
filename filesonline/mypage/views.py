@@ -1,4 +1,4 @@
-import os, shutil
+import os, shutil, base64
 
 from django.shortcuts import render
 from django.views import View
@@ -9,7 +9,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from file_upload.forms import UploadFileForm
 from file_upload.models import File, SharedFileWith
-from filesonline.utils import encrypt_file, decrypt_file, find_good_name, get_file_type, human_readable_size
+from filesonline.utils import (encrypt_file, decrypt_file, find_good_name,
+    get_file_type, human_readable_size, get_vault_token, check_vault_token)
 
 
 class RedirectHome(LoginRequiredMixin, View):
@@ -18,7 +19,7 @@ class RedirectHome(LoginRequiredMixin, View):
     redirect_field_name = 'index.html'
 
     def get(self, request):
-        return HttpResponseRedirect(reverse('mypage:main_page'))
+        return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': ''}))
 
 
 class MainPage(LoginRequiredMixin, View):
@@ -30,7 +31,11 @@ class MainPage(LoginRequiredMixin, View):
 
         upload_form = UploadFileForm()
 
-        files = File.objects.filter(owner=request.user, path=path).order_by('-is_directory', '-filename')
+        files = File.objects.filter(
+            owner=request.user,
+            path=path,
+            hidden=False,
+        ).order_by('-is_directory', '-filename')
 
         directories = files.filter(is_directory=True)
 
@@ -42,6 +47,15 @@ class MainPage(LoginRequiredMixin, View):
 
         shared_with_me = request.user.shared_with.all()
 
+        # print('received:{}'.format(request.session.get('vault')))
+        # print()
+
+        vault_access = True
+        if not check_vault_token(request.session.get('vault'), request.user):
+            vault_access = False
+            request.session['vault'] = None
+
+
         context = {
             'path': path,
             'files': files,
@@ -49,6 +63,7 @@ class MainPage(LoginRequiredMixin, View):
             'upload_form': upload_form,
             'shared_by_me': shared_by_me,
             'shared_with_me': shared_with_me,
+            'vault_access': vault_access,
         }
 
         return render(request, 'page/my_page.html', context=context)
@@ -503,23 +518,6 @@ class CopyFile(LoginRequiredMixin, View):
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
 
 
-class HideFile(LoginRequiredMixin, View):
-
-    login_url = '/user/login/'
-    redirect_field_name = 'index.html'
-
-    def post(self, request):
-
-        file = request.POST.get('file')
-        path = request.POST.get('path', '')
-
-        if not file:
-            return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
-
-        file_obj = File.objects.get(owner=request.user, filename=file, path=path)
-        file_obj.hidden = True
-
-
 class UnshareFile(LoginRequiredMixin, View):
 
     login_url = '/user/login/'
@@ -546,3 +544,66 @@ class UnshareFile(LoginRequiredMixin, View):
             pass
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+
+
+class EnterVaultKey(LoginRequiredMixin, View):
+
+    login_url = '/user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        path = request.POST.get('path')
+        vault_key = request.POST.get('vault_key')
+
+
+        if vault_key == request.user.user_profile.vault_key:
+            token = get_vault_token(request.user)
+
+            # print('Original:{}'.format(token))
+
+            request.session['vault'] = token
+
+        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+
+
+class HideFile(LoginRequiredMixin, View):
+
+    login_url = '/user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        path = request.POST.get('path')
+        file = request.POST.get('file')
+
+        if (
+                check_vault_token(request.session.get('vault'), request.user)
+        ):
+            file_obj = File.objects.get(owner=request.user, filename=file, path=path)
+
+            file_path = os.path.join(
+                os.path.join(request.user.user_profile.folder, file_obj.path),
+                file_obj.filename,
+            )
+
+            new_file_path = os.path.join(
+                request.user.user_profile.folder + '_vault',
+                file_obj.filename,
+            )
+
+            shutil.copyfile(file_path, new_file_path)
+
+            file_obj.path = ''
+            file_obj.hidden = True
+
+            if file_obj.shared:
+                file_obj.shared = False
+                for instance in file_obj.instances.all():
+                    instance.delete()
+
+            file_obj.save()
+
+            os.remove(file_path)
+
+        return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))

@@ -1,9 +1,10 @@
-import os
+import os, time
 
 import pyAesCrypt
+import jwt
 
 from filesonline.settings import encrypt_password, encrypt_bufferSize
-
+from filesonline.settings import token_sign_key, token_expiration
 from filesonline.settings import (IMAGE_EXTENSIONS, AUDIO_EXTENSIONS, VIDEO_EXTENSIONS,
     EXCEL_EXTENSIONS, WORD_EXTENSIONS, POWERPOINT_EXTENSIONS, PDF_EXTENSIONS,
     CODING_EXTENSIONS, ARCHIVE_EXTENSIONS)
@@ -82,3 +83,33 @@ def human_readable_size(size):
         if size < 1024 or unit == 'TB':
             return ''.join(["%.2f" % size, unit])
         size /= 1024
+
+
+def get_vault_token(user):
+
+    message = {
+        'user': user.pk,
+        'created_date': time.time()
+    }
+
+    return jwt.encode(message, token_sign_key, algorithm='HS256').decode('utf-8')
+
+
+def check_vault_token(token, user):
+
+    if not token:
+        return False
+
+    try:
+        message = jwt.decode(token, token_sign_key)
+
+        if (
+                message.get('user') == user.pk
+            and  time.time() - message.get('created_date') < token_expiration
+        ):
+            return True
+
+        return False
+    except jwt.exceptions.DecodeError as e:
+        print(e)
+        return False
