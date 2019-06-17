@@ -11,7 +11,7 @@ from file_upload.forms import UploadFileForm
 from file_upload.models import File, SharedFileWith
 from filesonline.utils import (encrypt_file, decrypt_file, find_good_name,
     get_file_type, human_readable_size, get_vault_token, check_vault_token)
-
+from filesonline.settings import DEFAULT_PROFILE_PIC_URL
 
 class RedirectHome(LoginRequiredMixin, View):
 
@@ -64,6 +64,7 @@ class MainPage(LoginRequiredMixin, View):
             'shared_by_me': shared_by_me,
             'shared_with_me': shared_with_me,
             'vault_access': vault_access,
+            'default_profile_pic_url': DEFAULT_PROFILE_PIC_URL,
         }
 
         return render(request, 'page/my_page.html', context=context)
@@ -132,6 +133,7 @@ class VaultPage(LoginRequiredMixin, View):
         context = {
             'vault_files': vault_files,
             'path': '',
+            'default_profile_pic_url': DEFAULT_PROFILE_PIC_URL,
         }
 
         return render(request, 'page/vault_page.html', context=context)

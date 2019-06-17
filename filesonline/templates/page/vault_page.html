@@ -64,14 +64,15 @@
 </style>
 <div class="container">
   <div id="big-jumbo" class="jumbotron">
-    {{ path }}
-    <p>Buna ziua, Domnule</p>
-    <p>Bine ati venit!</p>
 
-    {{ user.pk }}
-    {{ user.username }}
-    <!--<img src="{{ user.user_profile.user_picture }}" alt="">-->
-    {{ user.user_profile.user_picture }}
+    <p>Buna ziua, Domnule {{ user.username }}</p>
+
+    {% if user.user_profile.user_picture %}
+    <img src="{{ user.user_profile.user_picture.url }}" alt="Nu o vad" height="400px" width="400px">
+    {% else %}
+    <img src="{{ default_profile_pic_url }}" alt="Nu o vad" height="400px" width="400px">
+    {% endif %}
+
     <hr>
 
     {% for file in vault_files %}

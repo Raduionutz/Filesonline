@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-import mimetypes
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -130,12 +129,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIR = [STATIC_DIR, ]
+STATICFILES_DIRS = [STATIC_DIR, ]
 
 MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
 
 LOGIN_URL = 'user/login_do/'
+
+DEFAULT_PROFILE_PIC_URL = ''.join([
+    STATIC_URL,
+    'user.png',
+])
 
 encrypt_password = "23r9f3u98hf49pg293hfh39vh8[23hvb9p2hg93fh349"
 encrypt_bufferSize = 64 * 1024
