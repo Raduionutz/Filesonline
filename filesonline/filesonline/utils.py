@@ -103,6 +103,8 @@ def check_vault_token(token, user):
     try:
         message = jwt.decode(token, token_sign_key)
 
+        print('time since token created: {}'.format(time.time() - message.get('created_date')))
+
         if (
                 message.get('user') == user.pk
             and  time.time() - message.get('created_date') < token_expiration

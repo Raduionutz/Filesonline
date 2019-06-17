@@ -20,5 +20,6 @@ urlpatterns = [
     path('move_to_dir', views.MoveToDirectory.as_view(), name='move_to_dir'),
     path('unshare_file', views.UnshareFile.as_view(), name='unshare_file'),
     path('hide_file', views.HideFile.as_view(), name='hide_file'),
+    path('unhide_file', views.UnhideFile.as_view(), name='unhide_file'),
     path('enter_vault', views.EnterVaultKey.as_view(), name='enter_vault'),
 ]

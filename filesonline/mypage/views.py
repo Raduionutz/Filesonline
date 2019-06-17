@@ -223,9 +223,17 @@ class DecryptDownloadFile(LoginRequiredMixin, View):
 
         file = request.POST.get('file')
         path = request.POST.get('path', '')
-        file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
 
         db_file = File.objects.get(owner=request.user, filename=file, path=path)
+
+        if db_file.hidden:
+            if not check_vault_token(request.session.get('vault'), request.user):
+                return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': ''}))
+
+            file_path = os.path.join(request.user.user_profile.folder + '_vault', file)
+        else:
+            file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
+
         if db_file.encrypted is False:
             return DownloadFile().post(request)
 
@@ -252,6 +260,9 @@ class ShareFile(LoginRequiredMixin, View):
         share_with = request.POST.get('share_with')
 
         file_obj = File.objects.get(owner=request.user, filename=file, path=path)
+
+        if file_obj.hidden:
+            HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
 
         file_path = os.path.join(os.path.join(request.user.user_profile.folder, file_obj.path), file)
         share_with_user = User.objects.get(username=share_with)
@@ -348,18 +359,24 @@ class EncryptFile(LoginRequiredMixin, View):
 
     def post(self, request):
 
-        # path = path[1:]
-
         file = request.POST.get('file')
         path = request.POST.get('path', '')
 
         db_file = File.objects.get(owner=request.user, filename=file, path=path)
 
+        if db_file.hidden:
+            if not check_vault_token(request.session.get('vault'), request.user):
+                return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': ''}))
+
+            file_path = os.path.join(request.user.user_profile.folder + '_vault', file)
+            redirect = reverse('mypage:vault_page')
+        else:
+            file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
+            redirect = reverse('mypage:main_page', kwargs = {'path': path})
+
         if db_file.encrypted is False:
             db_file.filename = db_file.filename + '.enc'
             db_file.encrypted = True
-
-            file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
 
             encrypt_file(file_path, request.user)
 
@@ -367,7 +384,7 @@ class EncryptFile(LoginRequiredMixin, View):
 
             os.remove(file_path)
 
-        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+        return HttpResponseRedirect(redirect)
 
 
 class DecryptFile(LoginRequiredMixin, View):
@@ -382,11 +399,19 @@ class DecryptFile(LoginRequiredMixin, View):
 
         db_file = File.objects.get(owner=request.user, filename=file, path=path)
 
+        if db_file.hidden:
+            if not check_vault_token(request.session.get('vault'), request.user):
+                return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': ''}))
+
+            file_path = os.path.join(request.user.user_profile.folder + '_vault', file)
+            redirect = reverse('mypage:vault_page')
+        else:
+            file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
+            redirect = reverse('mypage:main_page', kwargs = {'path': path})
+
         if db_file.encrypted is True:
             db_file.filename = db_file.filename[:-4]
             db_file.encrypted = False
-
-            file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
 
             decrypt_file(file_path, request.user)
 
@@ -394,7 +419,7 @@ class DecryptFile(LoginRequiredMixin, View):
 
             os.remove(file_path)
 
-        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+        return HttpResponseRedirect(redirect)
 
 
 class MakeDirectory(LoginRequiredMixin, View):
@@ -546,10 +571,18 @@ class CopyFile(LoginRequiredMixin, View):
 
         file_obj = File.objects.get(owner=request.user, filename=file, path=path)
 
+        if file_obj.hidden:
+            if not check_vault_token(request.session.get('vault'), request.user):
+                return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': ''}))
+
+            file_path = os.path.join(request.user.user_profile.folder + '_vault', file)
+            redirect = reverse('mypage:vault_page')
+        else:
+            file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
+            redirect = reverse('mypage:main_page', kwargs={'path': path})
+
         if file_obj:
             copy_file_obj = File()
-
-            file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
 
             base_path, ext = os.path.splitext(file_path)
             copy_path = base_path + ' - Copy' + ext
@@ -560,6 +593,7 @@ class CopyFile(LoginRequiredMixin, View):
             copy_file_obj.path = file_obj.path
             copy_file_obj.file_type = file_obj.file_type
             copy_file_obj.size = file_obj.size
+            copy_file_obj.hidden = file_obj.hidden
 
             if os.path.exists(copy_path):
                 copy_path, i = find_good_name(copy_path)
@@ -573,7 +607,7 @@ class CopyFile(LoginRequiredMixin, View):
 
             copy_file_obj.save()
 
-        return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
+        return HttpResponseRedirect(redirect)
 
 
 class UnshareFile(LoginRequiredMixin, View):
@@ -665,3 +699,43 @@ class HideFile(LoginRequiredMixin, View):
             os.remove(file_path)
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
+
+
+class UnhideFile(LoginRequiredMixin, View):
+
+    login_url = '/user/login/'
+    redirect_field_name = 'index.html'
+
+    def post(self, request):
+
+        path = request.POST.get('path')
+        file = request.POST.get('file')
+
+        if (
+                check_vault_token(request.session.get('vault'), request.user)
+        ):
+            file_obj = File.objects.get(owner=request.user, filename=file, path=path)
+
+            if not file_obj.hidden:
+                return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': path}))
+
+            new_file_path = os.path.join(
+                request.user.user_profile.folder,
+                file_obj.filename,
+            )
+
+            file_path = os.path.join(
+                request.user.user_profile.folder + '_vault',
+                file_obj.filename,
+            )
+
+            shutil.copyfile(file_path, new_file_path)
+
+            file_obj.path = ''
+            file_obj.hidden = False
+
+            file_obj.save()
+
+            os.remove(file_path)
+
+        return HttpResponseRedirect(reverse('mypage:vault_page'))
