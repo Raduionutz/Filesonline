@@ -5,6 +5,7 @@ app_name = 'mypage'
 
 urlpatterns = [
     re_path(r'folder/(?P<path>.*)', views.MainPage.as_view(), name='main_page'),
+    path('vault', views.VaultPage.as_view(), name='vault_page'),
     path('delete_file', views.DeleteFile.as_view(), name='delete_file'),
     path('download_file', views.DownloadFile.as_view(), name='download_file'),
     path('share_file', views.ShareFile.as_view(), name='share_file'),

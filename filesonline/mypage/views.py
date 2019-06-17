@@ -103,13 +103,38 @@ class MainPage(LoginRequiredMixin, View):
                 db_file.owner = request.user
                 db_file.filename = f.name
                 db_file.path = path
-                print(os.path.splitext(f.name)[1])
                 db_file.file_type = get_file_type(os.path.splitext(f.name)[1])
                 db_file.size = human_readable_size(f.size)
 
                 db_file.save()
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+
+
+class VaultPage(LoginRequiredMixin, View):
+
+    login_url = '/user/login/'
+    redirect_field_name = 'index.html'
+
+    def get(self, request):
+
+        if not check_vault_token(request.session.get('vault'), request.user):
+            request.session['vault'] = None
+
+            return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': ''}))
+
+        vault_files = File.objects.filter(
+            owner=request.user,
+            hidden=True,
+        ).order_by('-filename')
+
+
+        context = {
+            'vault_files': vault_files,
+            'path': '',
+        }
+
+        return render(request, 'page/vault_page.html', context=context)
 
 
 class DeleteFile(LoginRequiredMixin, View):
@@ -123,12 +148,27 @@ class DeleteFile(LoginRequiredMixin, View):
         path = request.POST.get('path', '')
 
         if file:
-            db_file = File.objects.filter(owner=request.user, filename=file, path=path)
 
-            print(db_file)
+            db_file = File.objects.get(owner=request.user, filename=file, path=path)
+
+            if db_file.hidden:
+
+                if not check_vault_token(request.session.get('vault'), request.user):
+                    return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': ''}))
+
+                os.remove(os.path.join(
+                    request.user.user_profile.folder + '_vault',
+                    file,
+                ))
+
+                db_file.delete()
+
+                return HttpResponseRedirect(reverse('mypage:vault_page'))
+
+            # print(db_file)
             db_file.delete()
 
-            print(os.path.join(os.path.join(request.user.user_profile.folder, path), file))
+            # print(os.path.join(os.path.join(request.user.user_profile.folder, path), file))
             os.remove(os.path.join(os.path.join(request.user.user_profile.folder, path), file))
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
@@ -144,8 +184,26 @@ class DownloadFile(LoginRequiredMixin, View):
         file = request.POST.get('file')
         path = request.POST.get('path', '')
 
-        file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
+        db_file = File.objects.get(owner=request.user, filename=file, path=path)
 
+
+
+
+        if db_file.hidden:
+
+            if not check_vault_token(request.session.get('vault'), request.user):
+                return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': ''}))
+
+            file_path = os.path.join(
+                request.user.user_profile.folder + '_vault',
+                file,
+            )
+
+            redirect_rev = reverse('mypage:vault_page')
+        else:
+
+            file_path = os.path.join(os.path.join(request.user.user_profile.folder, path), file)
+            redirect_rev = reverse('mypage:main_page', kwargs={'path': path})
 
         if os.path.exists(file_path):
             with open(file_path, 'rb') as fh:
@@ -153,7 +211,7 @@ class DownloadFile(LoginRequiredMixin, View):
                 response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
                 return response
 
-        return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
+        return HttpResponseRedirect(redirect_rev)
 
 
 class DecryptDownloadFile(LoginRequiredMixin, View):

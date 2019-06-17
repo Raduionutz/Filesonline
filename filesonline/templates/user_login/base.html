@@ -18,6 +18,7 @@
 
                   {% if user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'mypage:main_page' path='' %}">My page</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'mypage:vault_page'%}">Secret Vault</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'user_login:logout' %}">Logout</a></li>
                   {% else %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'user_login:login_user' %}">Login</a></li>
