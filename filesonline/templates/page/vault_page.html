@@ -21,6 +21,7 @@
 
   #cont {
     padding-top: 2vh;
+    padding-bottom: 10vh;
   }
 
   i {
@@ -71,8 +72,8 @@
 
     <div class="top-desc">
       <div class="top-left">
-        <strong>Director curent: \{{ path }}</strong>
-        <p>Buna ziua, {{ user.username }}</p>
+        <strong>Current Directory: \{{ path }}</strong>
+        <p>Good day to you, {{ user.username }}</p>
       </div>
       <div class="top-right">
         {% if user.user_profile.user_picture %}
