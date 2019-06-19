@@ -127,7 +127,7 @@
 
   <hr>
   {% if not files %}
-  Nu exista fisiere!
+    No files found!
   {% endif %}
   {% for file in files %}
   {% if file.is_directory %}
@@ -313,7 +313,7 @@
   {% endfor %}
 
   <hr>
-  <strong>Files shared with me</strong>
+  <strong>Files shared with me:</strong>
   {% for file in shared_with_me %}
   <p>
     {{ file }}
@@ -333,7 +333,7 @@
 
   {% endfor %}
   <hr>
-  <strong>Shared Files</strong>
+  <strong>Shared Files:</strong>
   {% for file in shared_by_me %}
   <p>{{ file }}</p>
   {% for instance in file.instances.all %}
@@ -355,7 +355,7 @@
   <br>
   {% endfor %}
   <hr>
-  <strong>Incarcare fisier nou:</strong>
+  <strong>Upload new files:</strong>
   <br>
   <br>
   <form id="upload-file-form" class="dispinline" method="POST" enctype="multipart/form-data">
