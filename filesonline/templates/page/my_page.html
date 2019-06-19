@@ -84,7 +84,7 @@
     <div class="top-desc">
       <div class="top-left">
         <strong>Director curent: \{{ path }}</strong>
-        <p>Buna ziua, Domnule {{ user.username }}</p>
+        <p>Buna ziua, {{ user.username }}</p>
       </div>
       <div class="top-right">
         {% if user.user_profile.user_picture %}
@@ -125,6 +125,9 @@
     </form>
 
     <hr>
+    {% if not files %}
+      Nu exista fisiere!
+    {% endif %}
     {% for file in files %}
     {% if file.is_directory %}
     <div class="dir-div">
