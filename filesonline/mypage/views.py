@@ -13,6 +13,7 @@ from filesonline.utils import (encrypt_file, decrypt_file, find_good_name,
     get_file_type, human_readable_size, get_vault_token, check_vault_token)
 from filesonline.settings import DEFAULT_PROFILE_PIC_URL
 
+
 class RedirectHome(LoginRequiredMixin, View):
 
     login_url = '/user/login/'
@@ -172,6 +173,7 @@ class DeleteFile(LoginRequiredMixin, View):
 
             # print(os.path.join(os.path.join(request.user.user_profile.folder, path), file))
             os.remove(os.path.join(os.path.join(request.user.user_profile.folder, path), file))
+        # return HttpResponse('<script>history.back();</script>')
 
         return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': path}))
 

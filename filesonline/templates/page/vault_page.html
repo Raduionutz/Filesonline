@@ -2,24 +2,29 @@
 {% block body_block %}
 <style>
 
-  html {
-    background-color: #E1E8BC;
+  body {
+    background-color: #F5F5F5;
   }
 
-  body {
-    background-color: #E1E8BC;
+  #my-nav {
+    background-color: #297B80 !important;
+  }
+
+  .file-div {
+    display: flex;
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 20px;
+    box-shadow: 0 0 6px black !important;
+    background-color: #C9C9C9;
+  }
+
+  #cont {
+    padding-top: 2vh;
   }
 
   i {
     display: inline;
-  }
-
-  #my-nav {
-    background-color: #B9BE9A !important;
-  }
-
-  #big-jumbo {
-    background-color: #5EE0B7;
   }
 
   .dispinline {
@@ -34,44 +39,49 @@
     font-size: 3em;
   }
 
-  .file-div {
-    display: flex;
-    margin-top: 20px;
-    padding: 10px;
-    border-radius: 20px;
-    box-shadow: 0 0 6px black !important;
-    background-color: #29c796;
-  }
-
   .file-buttons-div {
     display: inline !important;
   }
 
   .file-info-div {
     display: inline !important;
-    padding: 80px;
   }
 
-  .dir-div {
-
+  .top-desc {
+    display: flex;
   }
 
-  .share-form {
-    margin-top: 10px;
-    margin-bottom: 10px;
+  .top-left {
+    margin-right: auto;
+    display: inline;
+  }
+
+  .top-right {
+    display: inline;
+  }
+
+  .profile-pic {
+    border-radius: 50%;
+    height: 9vh;
+    width: 9vh;
   }
 
 </style>
-<div class="container">
-  <div id="big-jumbo" class="jumbotron">
+<div id="cont" class="container pt5">
 
-    <p>Buna ziua, Domnule {{ user.username }}</p>
-
-    {% if user.user_profile.user_picture %}
-    <img src="{{ user.user_profile.user_picture.url }}" alt="Nu o vad" height="400px" width="400px">
-    {% else %}
-    <img src="{{ default_profile_pic_url }}" alt="Nu o vad" height="400px" width="400px">
-    {% endif %}
+    <div class="top-desc">
+      <div class="top-left">
+        <strong>Director curent: \{{ path }}</strong>
+        <p>Buna ziua, Domnule {{ user.username }}</p>
+      </div>
+      <div class="top-right">
+        {% if user.user_profile.user_picture %}
+        <img class="profile-pic" src="{{ user.user_profile.user_picture.url }}" alt="Nu o vad">
+        {% else %}
+        <img class="profile-pic" src="{{ default_profile_pic_url }}" alt="Nu o vad">
+        {% endif %}
+      </div>
+    </div>
 
     <hr>
 
@@ -197,5 +207,5 @@
     </div>
     {% endfor %}
   </div>
-</div>
+
 {% endblock %}

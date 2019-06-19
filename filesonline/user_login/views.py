@@ -57,6 +57,7 @@ def register(request):
                 random.choices(string.ascii_letters + string.digits, k=100),
             )
 
+
             profile.folder = os.path.join(os.path.join('media', 'user_files'), str(user.pk))
             os.mkdir(profile.folder)
             os.mkdir(profile.folder + '_vault')
@@ -64,6 +65,7 @@ def register(request):
             profile.save()
 
             registered = True
+            return HttpResponseRedirect(reverse('user_login:login_user'))
 
         else:
             print(user_form.errors,profile_form.errors)
@@ -94,7 +96,7 @@ def login_user(request):
         if user:
             if user.is_active:
                 login(request,user)
-                return HttpResponseRedirect(reverse('user_login:index'))
+                return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': ''}))
             else:
                 return HttpResponse('Your account is not active.')
         else:

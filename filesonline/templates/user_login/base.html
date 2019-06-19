@@ -2,36 +2,56 @@
 {% load staticfiles %}
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
         integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
 </head>
 <body>
 
-    <nav id="my-nav" class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <ul class="navbar-nav">
-                  <li class="nav-item"><a class="navbar-brand" href="{% url 'user_login:index' %}">Home</a></li>
-                  <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Django Admin</a></li>
-                  <li class="nav-item"><a class="nav-link" href="{% url 'user_login:register' %}">Register</a></li>
+<nav id="my-nav" class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container">
+    <ul class="navbar-nav">
+      <!--<li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Django Admin</a></li>-->
 
-                  {% if user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'mypage:main_page' path='' %}">My page</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'mypage:vault_page'%}">Secret Vault</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'user_login:logout' %}">Logout</a></li>
-                  {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'user_login:login_user' %}">Login</a></li>
-                  {% endif %}
-            </ul>
-        </div>
-    </nav>
+      {% if user.is_authenticated %}
+      <li class="nav-item"><a class="nav-link" href="{% url 'mypage:main_page' path='' %}">My page</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'mypage:vault_page'%}">Secret Vault</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'user_login:logout' %}">Logout</a></li>
+      {% else %}
+      <li class="nav-item"><a class="nav-link" href="{% url 'user_login:register' %}">Register</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'user_login:login_user' %}">Login</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>
 
-    <div class="container">
-    {% block body_block %}
-    {% endblock %}
-    </div>
+<div class="container">
+  {% block body_block %}
+  {% endblock %}
+</div>
 
+<script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+<script type="text/javascript">
+
+    window.onload = function () {
+
+        let pos = localStorage.getItem('my-scroll-pos', 0);
+
+        console.log('citesc');
+
+        console.log(pos);
+        if (pos)
+            $(window).scrollTop(pos)
+    };
+
+    $("form").submit(function () {
+        console.log('store');
+        localStorage.setItem('my-scroll-pos', $(window).scrollTop());
+    });
+
+</script>
 </body>
 </html>

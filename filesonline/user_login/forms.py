@@ -13,5 +13,5 @@ class ExtraRegForm(forms.ModelForm):
 
     class Meta():
         model = UserExtraInfo
-        fields = ('user_picture', )
+        fields = ('user_picture', 'vault_key')
 
