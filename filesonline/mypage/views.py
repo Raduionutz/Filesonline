@@ -1,4 +1,4 @@
-import os, shutil, base64
+import os, shutil
 
 from django.shortcuts import render
 from django.views import View
@@ -190,9 +190,6 @@ class DownloadFile(LoginRequiredMixin, View):
 
         db_file = File.objects.get(owner=request.user, filename=file, path=path)
 
-
-
-
         if db_file.hidden:
 
             if not check_vault_token(request.session.get('vault'), request.user):
@@ -317,7 +314,6 @@ class MoveSharedFile(LoginRequiredMixin, View):
         db_file.owner = request.user
         db_file.filename = file
 
-
         if os.path.exists(dest_path):
 
             dest_path, i = find_good_name(dest_path)
@@ -379,10 +375,11 @@ class EncryptFile(LoginRequiredMixin, View):
             redirect = reverse('mypage:main_page', kwargs = {'path': path})
 
         if db_file.encrypted is False:
-            db_file.filename = db_file.filename + '.enc'
-            db_file.encrypted = True
 
-            encrypt_file(file_path, request.user)
+            new_path = encrypt_file(file_path, request.user)
+
+            db_file.filename = os.path.basename(new_path)
+            db_file.encrypted = True
 
             db_file.save()
 
@@ -414,10 +411,15 @@ class DecryptFile(LoginRequiredMixin, View):
             redirect = reverse('mypage:main_page', kwargs = {'path': path})
 
         if db_file.encrypted is True:
-            db_file.filename = db_file.filename[:-4]
-            db_file.encrypted = False
+            # db_file.filename = db_file.filename[:-4]
+            # db_file.encrypted = False
+            #
+            # decrypt_file(file_path, request.user)
 
-            decrypt_file(file_path, request.user)
+            new_path = decrypt_file(file_path, request.user)
+
+            db_file.filename = os.path.basename(new_path)
+            db_file.encrypted = False
 
             db_file.save()
 

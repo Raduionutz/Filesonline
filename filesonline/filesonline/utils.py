@@ -19,23 +19,31 @@ def get_user_encrypt_password(user):
 
 
 def encrypt_file(file_path, user):
-    new_path = file_path + '.enc'
+
+    new_path, _ = find_good_name(file_path + '.enc')
+
     pyAesCrypt.encryptFile(file_path, new_path, get_user_encrypt_password(user), encrypt_bufferSize)
 
     return new_path
 
 
 def decrypt_file(encrypted_path, user):
-    dec_path = encrypted_path[:-4]
+    dec_path, _ = find_good_name(encrypted_path[:-4])
     pyAesCrypt.decryptFile(encrypted_path, dec_path, get_user_encrypt_password(user), encrypt_bufferSize)
 
     return dec_path
 
 
 def find_good_name(path):
+
+    if not os.path.exists(path):
+        return path, None
+
     i = 2
 
-    base, ext = os.path.splitext(path)
+    base, base_ext = os.path.splitext(os.path.splitext(path)[0])
+    ext = base_ext + os.path.splitext(path)[1]
+
     test_name = base + ' ({})'.format(i) + ext
     while os.path.exists(test_name):
         i += 1
