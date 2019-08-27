@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 
 
 def index(request):
-    return render(request,'user_login/index.html')
+    return render(request, 'user_login/index.html')
 
 
 @login_required
@@ -78,9 +78,9 @@ def register(request):
         request,
         'user_login/register.html',
         {
-            'user_form':user_form,
-            'user_extra_form':profile_form,
-            'registered':registered
+            'user_form': user_form,
+            'user_extra_form': profile_form,
+            'registered': registered
         }
     )
 
