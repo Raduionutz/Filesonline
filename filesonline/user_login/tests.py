@@ -8,10 +8,10 @@ from user_login import forms
 
 
 def test_register():
-    origRender = shortcuts.render
-    renderMock = mock.Mock()
+    orig_render = shortcuts.render
+    render_mock = mock.Mock()
 
-    setattr(views, 'render', renderMock)
+    setattr(views, 'render', render_mock)
 
     method = 'get'
     request = HttpRequest()
@@ -19,7 +19,7 @@ def test_register():
 
     views.register(request=request)
 
-    args, kwargs = renderMock.call_args
+    args, kwargs = render_mock.call_args
 
     assert args[0] == request
     assert args[1] == 'user_login/register.html'
@@ -29,4 +29,4 @@ def test_register():
 
     assert kwargs == {}
 
-
+    setattr(views, 'render', orig_render)
