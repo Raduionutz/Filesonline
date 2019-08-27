@@ -84,10 +84,6 @@ class MainPage(LoginRequiredMixin, View):
                         destination.write(chunk)
 
             for f in files:
-                # print(os.path.join(request.user.user_profile.folder))
-                # print(path)
-                #
-                # print(os.path.join(os.path.join(request.user.user_profile.folder, path), f.name))
                 handle_uploaded_file(
                     request.FILES['file'],
                     os.path.join(os.path.join(request.user.user_profile.folder, path), f.name)

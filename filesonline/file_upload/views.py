@@ -1,9 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from .forms import UploadFileForm
-from django.views.generic.edit import FormView
-
-# Create your views here.
 
 
 def upload_index(request):
@@ -11,8 +8,6 @@ def upload_index(request):
 
 
 def upload_file(request, path):
-
-    print(path)
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
