@@ -57,18 +57,16 @@ def register(request):
                 random.choices(string.ascii_letters + string.digits, k=100),
             )
 
-
             profile.folder = os.path.join(os.path.join('media', 'user_files'), str(user.pk))
             os.mkdir(profile.folder)
             os.mkdir(profile.folder + '_vault')
 
             profile.save()
 
-            registered = True
             return HttpResponseRedirect(reverse('user_login:login_user'))
 
         else:
-            print(user_form.errors,profile_form.errors)
+            print(user_form.errors, profile_form.errors)
 
     else:
         user_form = RegForm()
