@@ -93,8 +93,8 @@ def login_user(request):
 
         if user:
             if user.is_active:
-                login(request,user)
-                return HttpResponseRedirect(reverse('mypage:main_page', kwargs = {'path': ''}))
+                login(request, user)
+                return HttpResponseRedirect(reverse('mypage:main_page', kwargs={'path': ''}))
             else:
                 return HttpResponse('Your account is not active.')
         else:

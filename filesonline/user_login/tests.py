@@ -3,9 +3,9 @@ import pytest
 import os
 
 from django.http.request import HttpRequest
-from django import shortcuts
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 from user_login import views, forms, models
 
@@ -88,9 +88,111 @@ def test_register_post(monkeypatch):
     monkeypatch.setattr(User, 'save', value=save_mock_user)
     monkeypatch.setattr(models.UserExtraInfo, 'save', value=save_mock_user_extra)
 
-    assert isinstance(views.register(request=request), HttpResponseRedirect)
+    result = views.register(request=request)
+    assert isinstance(result, HttpResponseRedirect)
+    assert result.url == reverse('user_login:login_user')
+
     assert mkdir_mock.call_count == 2
 
     assert save_mock_user.call_count == 2
     assert save_mock_user_extra.call_count == 1
 
+
+@pytest.mark.django_db
+def test_login(monkeypatch):
+    user = User()
+    user.is_active = True
+
+    authenticate_mock = mock.MagicMock(return_value=user)
+    login_mock = mock.Mock()
+
+    monkeypatch.setattr(views, 'authenticate', authenticate_mock)
+    monkeypatch.setattr(views, 'login', login_mock)
+
+    method = 'POST'
+    request = HttpRequest()
+    request.method = method
+
+    result = views.login_user(request=request)
+
+    authenticate_mock.assert_called_once()
+    login_mock.assert_called_once()
+
+    assert isinstance(result, HttpResponseRedirect)
+    assert result.url == reverse('mypage:main_page', kwargs={'path': ''})
+
+
+@pytest.mark.django_db
+def test_login_not_active(monkeypatch):
+    user = User()
+    user.is_active = False
+
+    authenticate_mock = mock.MagicMock(return_value=user)
+    login_mock = mock.Mock()
+
+    monkeypatch.setattr(views, 'authenticate', authenticate_mock)
+    monkeypatch.setattr(views, 'login', login_mock)
+
+    method = 'POST'
+    request = HttpRequest()
+    request.method = method
+
+    result = views.login_user(request=request)
+
+    authenticate_mock.assert_called_once()
+    login_mock.assert_not_called()
+
+    assert result.status_code == 200
+
+
+@pytest.mark.django_db
+def test_login_invalid_login(monkeypatch):
+    authenticate_mock = mock.MagicMock(return_value=None)
+    login_mock = mock.Mock()
+
+    monkeypatch.setattr(views, 'authenticate', authenticate_mock)
+    monkeypatch.setattr(views, 'login', login_mock)
+
+    method = 'POST'
+    request = HttpRequest()
+    request.method = method
+
+    result = views.login_user(request=request)
+
+    authenticate_mock.assert_called_once()
+    login_mock.assert_not_called()
+
+    assert result.status_code == 200
+
+
+@pytest.mark.django_db
+def test_login_get(monkeypatch):
+    authenticate_mock = mock.MagicMock(return_value=None)
+    login_mock = mock.Mock()
+
+    monkeypatch.setattr(views, 'authenticate', authenticate_mock)
+    monkeypatch.setattr(views, 'login', login_mock)
+
+    method = 'GET'
+    request = HttpRequest()
+    request.method = method
+
+    result = views.login_user(request=request)
+
+    authenticate_mock.assert_not_called()
+    login_mock.assert_not_called()
+
+    assert result.status_code == 200
+
+
+def test_logout(monkeypatch):
+    logout_mock = mock.Mock()
+    monkeypatch.setattr(views, 'logout', logout_mock)
+
+    method = 'GET'
+    request = HttpRequest()
+    request.method = method
+
+    views.logout(request=request)
+
+    logout_mock.assert_called_once()
