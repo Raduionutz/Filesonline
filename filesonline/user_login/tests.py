@@ -52,6 +52,8 @@ def test_register_post_invalid_email(monkeypatch):
 
     views.register(request=request)
 
+    mkdir_mock.assert_not_called()
+
     args, kwargs = render_mock.call_args
 
     assert args[0] == request
@@ -193,6 +195,9 @@ def test_logout(monkeypatch):
     request = HttpRequest()
     request.method = method
 
-    views.logout(request=request)
+    result = views.logout(request=request)
 
     logout_mock.assert_called_once()
+
+    assert isinstance(result, HttpResponseRedirect)
+    assert result.url == reverse('user_login:login_user')
